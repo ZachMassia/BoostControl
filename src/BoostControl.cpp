@@ -51,7 +51,6 @@ void loop() // -----------------------------------------------------------------
 
     if (modeBtn.wasPushed()) {
         toggleBoostMode();
-        Serial.print("PUSH");
     }
 
     switch (currentBoostMode) {
