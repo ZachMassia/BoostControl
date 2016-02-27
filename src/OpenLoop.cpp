@@ -1,9 +1,8 @@
 #include "OpenLoop.h"
 
 OpenLoop::OpenLoop(const BoostMode &_currentMode, BoostMode _modeType, byte _outputPin, byte _dutyCycle)
-    : ControlMode(_currentMode, _modeType)
+    : ControlMode(_currentMode, _modeType, _outputPin)
     , dutyCycle(_dutyCycle)
-    , outputPin(_outputPin)
 {
 
 }
@@ -12,8 +11,6 @@ void OpenLoop::update()
 {
     if (currentMode == modeType) {
         analogWrite(outputPin, dutyCycle);
-    } else {
-        analogWrite(outputPin, 0);
     }
 }
 

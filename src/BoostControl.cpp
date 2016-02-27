@@ -51,10 +51,13 @@ void loop() // -----------------------------------------------------------------
 
     if (modeBtn.wasPushed()) {
         toggleBoostMode();
+        updateLCDBoostMode();
     }
 
     switch (currentBoostMode) {
         case Off:
+            // TODO: Make sure writing pin high makes turbo run off wastegate spring pressure
+            digitalWrite(OUTPUT_PIN, HIGH);
             lcd.setCursor(0, 1);
             lcd.print(F("                "));
             break;
@@ -76,20 +79,19 @@ void loop() // -----------------------------------------------------------------
 
 void initButtons()
 {
-    ButtonThread buttons[] = { upBtn, downBtn, modeBtn };
+    ButtonThread *buttons[] = { &upBtn, &downBtn, &modeBtn };
 
     for (byte i = 0; i < 3; i++) {
-        buttons[i].setInterval(BTN_THREAD_INTERVAL);
-        //controller.add(&buttons[i]);
+        buttons[i]->setInterval(BTN_THREAD_INTERVAL);
+        controller.add(buttons[i]);
     }
-    controller.add(&modeBtn);
+    //controller.add(&modeBtn);
 }
 
 
 void toggleBoostMode()
 {
     currentBoostMode = (BoostMode)((currentBoostMode + 1) % TotalModeCount);
-    updateLCDBoostMode();
 }
 
 

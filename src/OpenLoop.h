@@ -9,7 +9,7 @@ class OpenLoop: public ControlMode
 {
 private:
     byte dutyCycle;
-    const byte outputPin;
+    
 
 public:
     OpenLoop(BoostMode const& _currentMode, BoostMode _modeType, byte _dutyCycle, byte outputPin);

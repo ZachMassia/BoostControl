@@ -12,11 +12,13 @@ protected:
 
     const BoostMode &currentMode;
     const BoostMode modeType;
+    const byte outputPin;
 
 public:
-    ControlMode(BoostMode const& _currentMode, BoostMode _modeType)
+    ControlMode(BoostMode const& _currentMode, BoostMode _modeType, byte _outputPin)
         : currentMode(_currentMode)
         , modeType(_modeType)
+        , outputPin(_outputPin)
         {}
 
     const String getOutputStr();
