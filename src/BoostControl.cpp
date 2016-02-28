@@ -85,7 +85,6 @@ void initButtons()
         buttons[i]->setInterval(BTN_THREAD_INTERVAL);
         controller.add(buttons[i]);
     }
-    //controller.add(&modeBtn);
 }
 
 
