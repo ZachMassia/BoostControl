@@ -11,7 +11,9 @@
 
 #include "Globals.h"
 #include "ButtonThread.h"
+#include "ControlMode.h"
 #include "OpenLoop.h"
+#include "ClosedLoop.h"
 
 // Threads
 ThreadController controller;
@@ -25,6 +27,7 @@ BoostMode currentBoostMode = Off;
 // Objects
 LiquidCrystal lcd(2, 3, 4, 5, 6, 7);
 OpenLoop      openLoop(currentBoostMode, OpenLoopMode, OUTPUT_PIN, OPEN_LOOP_INIT_DUTY_CYCLE);
+ClosedLoop    closedLoop(currentBoostMode, ClosedLoopMode, OUTPUT_PIN);
 
 
 // Functions
@@ -32,7 +35,7 @@ void initButtons();
 void toggleBoostMode();
 void updateLCDBoostMode();
 
-void onOpenLoopMode();
+ControlMode *getModePtr();
 
 
 void setup() // ------------------------------------------------------------------------------------
@@ -54,25 +57,26 @@ void loop() // -----------------------------------------------------------------
         updateLCDBoostMode();
     }
 
-    switch (currentBoostMode) {
-        case Off:
-            // TODO: Make sure writing pin high makes turbo run off wastegate spring pressure
-            digitalWrite(OUTPUT_PIN, HIGH);
-            lcd.setCursor(0, 1);
-            lcd.print(F("                "));
-            break;
+    ControlMode *mode = getModePtr();   // Must be after potential call to toggleBoostMode().
 
-        case OpenLoopMode:
-            onOpenLoopMode();
-            break;
+    if (mode == NULL) {
+        // TODO: Make sure writing pin high makes turbo run off wastegate spring pressure
+        digitalWrite(OUTPUT_PIN, HIGH);
 
-        case ClosedLoopMode:
-            lcd.setCursor(0, 1);
-            lcd.print(F("                "));
-            break;
+        lcd.setCursor(0, 1);
+        lcd.print(F("                "));
+    } else {
+        if (upBtn.wasPushed()) {
+            mode->onUpBtn();
+        }
+        if (downBtn.wasPushed()) {
+            mode->onDownBtn();
+        }
 
-        default:
-            break;
+        mode->update();
+
+        lcd.setCursor(0, 1);
+        lcd.print(mode->getOutputStr());
     }
 }
 
@@ -96,32 +100,21 @@ void toggleBoostMode()
 
 void updateLCDBoostMode()
 {
+    ControlMode *mode = getModePtr();
+
     lcd.home();
-    switch (currentBoostMode)
-    {
-        case Off:
-            lcd.print(F("EBC:     Off    "));
-            break;
-        case OpenLoopMode:
-            lcd.print(F("EBC:   Open Loop"));
-            break;
-        case ClosedLoopMode:
-            lcd.print(F("EBC: Closed Loop"));
-        default:
-            break;
+
+    if (mode == NULL) {
+        lcd.print(F("EBC:     Off    "));
+    } else {
+        lcd.print(mode->headerStr);
     }
 }
 
-void onOpenLoopMode()
+
+ControlMode *getModePtr()
 {
-    if (upBtn.wasPushed()) {
-        openLoop.increase();
-    } else if (downBtn.wasPushed()) {
-        openLoop.decrease();
-    }
+    static ControlMode *modes[] = { NULL, &openLoop, &closedLoop };
 
-    openLoop.update();
-
-    lcd.setCursor(0, 1);
-    lcd.print(openLoop.getOutputStr());
+    return modes[currentBoostMode];
 }

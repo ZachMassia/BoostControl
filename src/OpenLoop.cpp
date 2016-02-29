@@ -1,11 +1,12 @@
 #include "OpenLoop.h"
 
 OpenLoop::OpenLoop(const BoostMode &_currentMode, BoostMode _modeType, byte _outputPin, byte _dutyCycle)
-    : ControlMode(_currentMode, _modeType, _outputPin)
+    : ControlMode(_currentMode, _modeType, _outputPin, String(F("EBC:   Open Loop")))
     , dutyCycle(_dutyCycle)
 {
 
 }
+
 
 void OpenLoop::update()
 {
@@ -13,6 +14,7 @@ void OpenLoop::update()
         analogWrite(outputPin, dutyCycle);
     }
 }
+
 
 const String OpenLoop::getOutputStr()
 {
@@ -25,6 +27,8 @@ const String OpenLoop::getOutputStr()
     return str;
 }
 
-void OpenLoop::increase() { dutyCycle++; }
 
-void OpenLoop::decrease() { dutyCycle--; }
+void OpenLoop::onUpBtn() { dutyCycle++; }
+
+
+void OpenLoop::onDownBtn() { dutyCycle--; }

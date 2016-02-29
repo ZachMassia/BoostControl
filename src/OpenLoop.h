@@ -9,16 +9,16 @@ class OpenLoop: public ControlMode
 {
 private:
     byte dutyCycle;
-    
+
 
 public:
     OpenLoop(BoostMode const& _currentMode, BoostMode _modeType, byte _dutyCycle, byte outputPin);
 
-    void update();
-    const String getOutputStr();
+    virtual void onUpBtn();
+    virtual void onDownBtn();
+    virtual void update();
 
-    void increase();
-    void decrease();
+    virtual const String getOutputStr();
 };
 
 #endif /* OPENLOOP_H */

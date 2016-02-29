@@ -12,6 +12,12 @@ private:
 
 public:
     ClosedLoop(BoostMode const& _currentMode, BoostMode _modeType, byte _outputPin);
+
+    virtual void onUpBtn();
+    virtual void onDownBtn();
+    virtual void update();
+
+    virtual const String getOutputStr();
 };
 
 #endif /* CLOSEDLOOP_H */

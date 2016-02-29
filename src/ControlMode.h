@@ -15,13 +15,20 @@ protected:
     const byte outputPin;
 
 public:
-    ControlMode(BoostMode const& _currentMode, BoostMode _modeType, byte _outputPin)
+    const String headerStr;
+
+    ControlMode(BoostMode const& _currentMode, BoostMode _modeType, byte _outputPin, String _headerStr)
         : currentMode(_currentMode)
         , modeType(_modeType)
         , outputPin(_outputPin)
+        , headerStr(_headerStr)
         {}
 
-    const String getOutputStr();
+    virtual void onUpBtn() = 0;
+    virtual void onDownBtn() = 0;
+    virtual void update() = 0;
+
+    virtual const String getOutputStr() = 0;
 };
 
 #endif /* CONTROLMODE_H */
