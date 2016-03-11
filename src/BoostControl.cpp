@@ -2,10 +2,6 @@
 #include <Wire.h>
 
 #include <LiquidCrystal.h>
-
-#include <PID_v1.h>
-#include <PID_AutoTune_v0.h>
-
 #include <Thread.h>
 #include <ThreadController.h>
 
@@ -22,12 +18,13 @@ ButtonThread     downBtn(DOWN_BTN_PIN, BTN_DEBOUNCE_TIME, BTN_SAMPLE_FREQ);
 ButtonThread     modeBtn(MODE_BTN_PIN, BTN_DEBOUNCE_TIME, BTN_SAMPLE_FREQ);
 
 // Runtime settings
-BoostMode currentBoostMode = Off;
+BoostMode   currentBoostMode = Off;
+ControlMode *currentModePtr  = NULL;
 
 // Objects
 LiquidCrystal lcd(2, 3, 4, 5, 6, 7);
 OpenLoop      openLoop(currentBoostMode, OpenLoopMode, OUTPUT_PIN, OPEN_LOOP_INIT_DUTY_CYCLE);
-ClosedLoop    closedLoop(currentBoostMode, ClosedLoopMode, OUTPUT_PIN);
+ClosedLoop    closedLoop(currentBoostMode, ClosedLoopMode, OUTPUT_PIN, MAP_SENSOR_PIN);
 
 
 // Functions
@@ -59,6 +56,12 @@ void loop() // -----------------------------------------------------------------
 
     ControlMode *mode = getModePtr();   // Must be after potential call to toggleBoostMode().
 
+    if (mode != currentModePtr) { // We've just changed boost modes.
+        currentModePtr->onDeactivate();
+        mode->onActivate();
+        currentModePtr = mode;
+    }
+
     if (mode == NULL) {
         // TODO: Make sure writing pin high makes turbo run off wastegate spring pressure
         digitalWrite(OUTPUT_PIN, HIGH);
@@ -67,16 +70,16 @@ void loop() // -----------------------------------------------------------------
         lcd.print(F("                "));
     } else {
         if (upBtn.wasPushed()) {
-            mode->onUpBtn();
+            currentModePtr->onUpBtn();
         }
         if (downBtn.wasPushed()) {
-            mode->onDownBtn();
+            currentModePtr->onDownBtn();
         }
 
-        mode->update();
+        currentModePtr->update();
 
         lcd.setCursor(0, 1);
-        lcd.print(mode->getOutputStr());
+        lcd.print(currentModePtr->getOutputStr());
     }
 }
 
