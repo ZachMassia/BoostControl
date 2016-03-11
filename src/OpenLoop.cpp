@@ -10,9 +10,7 @@ OpenLoop::OpenLoop(const BoostMode &_currentMode, BoostMode _modeType, byte _out
 
 void OpenLoop::update()
 {
-    if (currentMode == modeType) {
-        analogWrite(outputPin, dutyCycle);
-    }
+    analogWrite(outputPin, dutyCycle);
 }
 
 
