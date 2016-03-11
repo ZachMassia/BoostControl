@@ -24,8 +24,11 @@ public:
         , headerStr(_headerStr)
         {}
 
-    virtual void onUpBtn() = 0;
-    virtual void onDownBtn() = 0;
+    virtual void onUpBtn()      {}
+    virtual void onDownBtn()    {}
+    virtual void onDeactivate() {}
+    virtual void onActivate()   {}
+
     virtual void update() = 0;
 
     virtual const String getOutputStr() = 0;
