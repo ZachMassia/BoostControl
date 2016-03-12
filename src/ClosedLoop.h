@@ -11,7 +11,7 @@
 class ClosedLoop : public ControlMode
 {
 private:
-    byte   inputPin;        // Input sensor pin.
+    byte   mapSensorPin;        // Input sensor pin.
     double mapReading;      // The 0-5V signal from the MAP sensor.
     double dutyCycle;       // The current duty cycle of the solenoid.
     double boostSetpoint;   // The desired boost level.
@@ -21,7 +21,7 @@ private:
 
 
 public:
-    ClosedLoop(BoostMode const& _currentMode, BoostMode _modeType, byte _outputPin, byte _inputPin);
+    ClosedLoop(BoostMode const& _currentMode, BoostMode _modeType, byte _solenoidPin, byte _mapSensorPin);
 
     virtual void onUpBtn();
     virtual void onDownBtn();

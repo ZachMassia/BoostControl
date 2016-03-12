@@ -2,10 +2,10 @@
 
 #include <PID_v1.h>
 
-ClosedLoop::ClosedLoop(BoostMode const& _currentMode, BoostMode _modeType, byte _outputPin,
-                       byte _inputPin)
-    : ControlMode(_currentMode, _modeType, _outputPin, String(F("EBC: Closed Loop")))
-    , inputPin(_inputPin)
+ClosedLoop::ClosedLoop(BoostMode const& _currentMode, BoostMode _modeType, byte _solenoidPin,
+                       byte _mapSensorPin)
+    : ControlMode(_currentMode, _modeType, _solenoidPin, String(F("EBC: Closed Loop")))
+    , mapSensorPin(_mapSensorPin)
     , mapReading(0)
     , dutyCycle(0)
     , boostSetpoint(0)
@@ -41,10 +41,10 @@ void ClosedLoop::onActivate()
 
 void ClosedLoop::update()
 {
-    mapReading = analogRead(inputPin);
+    mapReading = analogRead(mapSensorPin);
 
     if (pid.Compute()) {
-        analogWrite(outputPin, dutyCycle);
+        analogWrite(solenoidPin, dutyCycle);
     }
 }
 

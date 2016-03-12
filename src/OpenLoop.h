@@ -12,7 +12,7 @@ private:
 
 
 public:
-    OpenLoop(BoostMode const& _currentMode, BoostMode _modeType, byte _dutyCycle, byte outputPin);
+    OpenLoop(BoostMode const& _currentMode, BoostMode _modeType, byte _solenoidPin, byte _dutyCycle);
 
     virtual void onUpBtn();
     virtual void onDownBtn();

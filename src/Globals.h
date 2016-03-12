@@ -14,7 +14,7 @@
 #define UP_BTN_PIN     8
 #define DOWN_BTN_PIN   9
 #define MODE_BTN_PIN   10
-#define OUTPUT_PIN     11
+#define SOLENOID_PIN   11
 #define MAP_SENSOR_PIN 12
 
 enum BoostMode { Off, OpenLoopMode, ClosedLoopMode, TotalModeCount};

@@ -1,7 +1,7 @@
 #include "OpenLoop.h"
 
-OpenLoop::OpenLoop(const BoostMode &_currentMode, BoostMode _modeType, byte _outputPin, byte _dutyCycle)
-    : ControlMode(_currentMode, _modeType, _outputPin, String(F("EBC:   Open Loop")))
+OpenLoop::OpenLoop(const BoostMode &_currentMode, BoostMode _modeType, byte _solenoidPin, byte _dutyCycle)
+    : ControlMode(_currentMode, _modeType, _solenoidPin, String(F("EBC:   Open Loop")))
     , dutyCycle(_dutyCycle)
 {
 
@@ -10,7 +10,7 @@ OpenLoop::OpenLoop(const BoostMode &_currentMode, BoostMode _modeType, byte _out
 
 void OpenLoop::update()
 {
-    analogWrite(outputPin, dutyCycle);
+    analogWrite(solenoidPin, dutyCycle);
 }
 
 

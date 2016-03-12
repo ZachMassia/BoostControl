@@ -12,15 +12,15 @@ protected:
 
     const BoostMode &currentMode;
     const BoostMode modeType;
-    const byte outputPin;
+    const byte solenoidPin;
 
 public:
     const String headerStr;
 
-    ControlMode(BoostMode const& _currentMode, BoostMode _modeType, byte _outputPin, String _headerStr)
+    ControlMode(BoostMode const& _currentMode, BoostMode _modeType, byte _solenoidPin, String _headerStr)
         : currentMode(_currentMode)
         , modeType(_modeType)
-        , outputPin(_outputPin)
+        , solenoidPin(_solenoidPin)
         , headerStr(_headerStr)
         {}
 

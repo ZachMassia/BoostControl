@@ -23,8 +23,8 @@ ControlMode *currentModePtr  = NULL;
 
 // Objects
 LiquidCrystal lcd(2, 3, 4, 5, 6, 7);
-OpenLoop      openLoop(currentBoostMode, OpenLoopMode, OUTPUT_PIN, OPEN_LOOP_INIT_DUTY_CYCLE);
-ClosedLoop    closedLoop(currentBoostMode, ClosedLoopMode, OUTPUT_PIN, MAP_SENSOR_PIN);
+OpenLoop      openLoop(currentBoostMode, OpenLoopMode, SOLENOID_PIN, OPEN_LOOP_INIT_DUTY_CYCLE);
+ClosedLoop    closedLoop(currentBoostMode, ClosedLoopMode, SOLENOID_PIN, MAP_SENSOR_PIN);
 
 
 // Functions
@@ -64,7 +64,7 @@ void loop() // -----------------------------------------------------------------
 
     if (mode == NULL) {
         // TODO: Make sure writing pin high makes turbo run off wastegate spring pressure
-        digitalWrite(OUTPUT_PIN, HIGH);
+        digitalWrite(SOLENOID_PIN, HIGH);
 
         lcd.setCursor(0, 1);
         lcd.print(F("                "));
