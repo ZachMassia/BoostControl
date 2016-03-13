@@ -1,6 +1,5 @@
 #include "ClosedLoop.hpp"
 
-#include <PID_v1.h>
 
 ClosedLoop::ClosedLoop(BoostMode const& _currentMode, BoostMode _modeType, byte _solenoidPin,
                        byte _mapSensorPin)
