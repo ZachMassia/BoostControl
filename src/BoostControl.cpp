@@ -19,7 +19,7 @@ ButtonThread     modeBtn(MODE_BTN_PIN, BTN_DEBOUNCE_TIME, BTN_SAMPLE_FREQ);
 
 // Runtime settings
 BoostMode   currentBoostMode = Off;
-ControlMode *currentModePtr  = NULL;
+ControlMode *currentModePtr  = nullptr;
 
 // Objects
 LiquidCrystal lcd(2, 3, 4, 5, 6, 7);
@@ -57,12 +57,16 @@ void loop() // -----------------------------------------------------------------
     ControlMode *mode = getModePtr();   // Must be after potential call to toggleBoostMode().
 
     if (mode != currentModePtr) { // We've just changed boost modes.
-        currentModePtr->onDeactivate();
-        mode->onActivate();
+        if (currentModePtr != nullptr) {
+            currentModePtr->onDeactivate();
+        }
+        if (mode != nullptr) {
+            mode->onActivate();
+        }
         currentModePtr = mode;
     }
 
-    if (mode == NULL) {
+    if (mode == nullptr) {
         // TODO: Make sure writing pin high makes turbo run off wastegate spring pressure
         digitalWrite(SOLENOID_PIN, HIGH);
 
@@ -107,7 +111,7 @@ void updateLCDBoostMode()
 
     lcd.home();
 
-    if (mode == NULL) {
+    if (mode == nullptr) {
         lcd.print(F("EBC:     Off    "));
     } else {
         lcd.print(mode->headerStr);
@@ -117,7 +121,7 @@ void updateLCDBoostMode()
 
 ControlMode *getModePtr()
 {
-    static ControlMode *modes[] = { NULL, &openLoop, &closedLoop };
+    static ControlMode *modes[] = { nullptr, &openLoop, &closedLoop };
 
     return modes[currentBoostMode];
 }
