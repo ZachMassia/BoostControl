@@ -38,6 +38,7 @@ void ClosedLoop::onActivate()
     pid.SetMode(AUTOMATIC);
 }
 
+
 void ClosedLoop::update()
 {
     mapReading = analogRead(mapSensorPin);
@@ -52,7 +53,7 @@ const String ClosedLoop::getOutputStr()
 {
     str = String(F("T "));
     str.concat(boostSetpoint);
-    str.concat(F(" B "));
+    str.concat(F("  B "));
     str.concat(mapReading);
 
     return str;

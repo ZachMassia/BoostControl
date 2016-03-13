@@ -6,9 +6,10 @@
 #define BTN_SAMPLE_FREQ     20      // Hz
 #define BTN_THREAD_INTERVAL 50      // Milliseconds (1 / BTN_SAMPLE_FREQ)(1000)
 
-// LCD size
+// LCD
 #define LCD_W 16
 #define LCD_H 2
+#define LCD_UPDATE_TIME_MS 250      // How often to refresh the bottom line (mode's output)
 
 // Pins
 #define UP_BTN_PIN     8

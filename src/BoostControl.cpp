@@ -16,6 +16,7 @@ ThreadController controller;
 ButtonThread     upBtn(UP_BTN_PIN,     BTN_DEBOUNCE_TIME, BTN_SAMPLE_FREQ);
 ButtonThread     downBtn(DOWN_BTN_PIN, BTN_DEBOUNCE_TIME, BTN_SAMPLE_FREQ);
 ButtonThread     modeBtn(MODE_BTN_PIN, BTN_DEBOUNCE_TIME, BTN_SAMPLE_FREQ);
+Thread           lcdThread;
 
 // Runtime settings
 BoostMode   currentBoostMode = Off;
@@ -31,6 +32,7 @@ ClosedLoop    closedLoop(currentBoostMode, ClosedLoopMode, SOLENOID_PIN, MAP_SEN
 void initButtons();
 void toggleBoostMode();
 void updateLCDBoostMode();
+void updateLCDModeOutput();
 
 ControlMode *getModePtr();
 
@@ -41,6 +43,10 @@ void setup() // ----------------------------------------------------------------
     lcd.begin(LCD_W, LCD_H);
 
     initButtons();
+
+    lcdThread.onRun(updateLCDModeOutput);
+    lcdThread.setInterval(LCD_UPDATE_TIME_MS);
+    controller.add(&lcdThread);
 
     updateLCDBoostMode();
 }
@@ -54,7 +60,7 @@ void loop() // -----------------------------------------------------------------
         updateLCDBoostMode();
     }
 
-    ControlMode *currentMode getModePtr();   // Must be after potential call to toggleBoostMode().
+    ControlMode *currentMode = getModePtr();   // Must be after potential call to toggleBoostMode().
 
     if (currentMode != previousMode) { // We've just changed boost modes.
         if (previousMode != nullptr) {
@@ -81,9 +87,6 @@ void loop() // -----------------------------------------------------------------
         }
 
         currentMode->update();
-
-        lcd.setCursor(0, 1);
-        lcd.print(currentMode->getOutputStr());
     }
 }
 
@@ -116,6 +119,18 @@ void updateLCDBoostMode()
     } else {
         lcd.print(mode->headerStr);
     }
+}
+
+void updateLCDModeOutput()
+{
+    ControlMode *mode = getModePtr();
+
+    if (mode == nullptr) {
+        return;
+    }
+
+    lcd.setCursor(0, 1);
+    lcd.print(mode->getOutputStr());
 }
 
 
