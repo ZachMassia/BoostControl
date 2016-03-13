@@ -19,7 +19,7 @@ ButtonThread     modeBtn(MODE_BTN_PIN, BTN_DEBOUNCE_TIME, BTN_SAMPLE_FREQ);
 
 // Runtime settings
 BoostMode   currentBoostMode = Off;
-ControlMode *currentModePtr  = nullptr;
+ControlMode *previousMode  = nullptr;
 
 // Objects
 LiquidCrystal lcd(2, 3, 4, 5, 6, 7);
@@ -54,19 +54,19 @@ void loop() // -----------------------------------------------------------------
         updateLCDBoostMode();
     }
 
-    ControlMode *mode = getModePtr();   // Must be after potential call to toggleBoostMode().
+    ControlMode *currentMode getModePtr();   // Must be after potential call to toggleBoostMode().
 
-    if (mode != currentModePtr) { // We've just changed boost modes.
-        if (currentModePtr != nullptr) {
-            currentModePtr->onDeactivate();
+    if (currentMode != previousMode) { // We've just changed boost modes.
+        if (previousMode != nullptr) {
+            previousMode->onDeactivate();
         }
-        if (mode != nullptr) {
-            mode->onActivate();
+        if (currentMode != nullptr) {
+            currentMode->onActivate();
         }
-        currentModePtr = mode;
+        previousMode = currentMode;
     }
 
-    if (mode == nullptr) {
+    if (currentMode == nullptr) {
         // TODO: Make sure writing pin high makes turbo run off wastegate spring pressure
         digitalWrite(SOLENOID_PIN, HIGH);
 
@@ -74,16 +74,16 @@ void loop() // -----------------------------------------------------------------
         lcd.print(F("                "));
     } else {
         if (upBtn.wasPushed()) {
-            currentModePtr->onUpBtn();
+            currentMode->onUpBtn();
         }
         if (downBtn.wasPushed()) {
-            currentModePtr->onDownBtn();
+            currentMode->onDownBtn();
         }
 
-        currentModePtr->update();
+        currentMode->update();
 
         lcd.setCursor(0, 1);
-        lcd.print(currentModePtr->getOutputStr());
+        lcd.print(currentMode->getOutputStr());
     }
 }
 
