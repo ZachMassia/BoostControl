@@ -1,4 +1,4 @@
-#include "OpenLoop.h"
+#include "OpenLoop.hpp"
 
 OpenLoop::OpenLoop(const BoostMode &_currentMode, BoostMode _modeType, byte _solenoidPin, byte _dutyCycle)
     : ControlMode(_currentMode, _modeType, _solenoidPin, String(F("EBC:   Open Loop")))

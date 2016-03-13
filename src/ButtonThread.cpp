@@ -1,4 +1,4 @@
-#include "ButtonThread.h"
+#include "ButtonThread.hpp"
 
 ButtonThread::ButtonThread(byte _pin, double _debounceTime, double _sampleFrequency)
     : pin(_pin)

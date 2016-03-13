@@ -4,7 +4,7 @@
 #include <Arduino.h>
 #include <PID_v1.h>
 #include "Globals.h"
-#include "ControlMode.h"
+#include "ControlMode.hpp"
 
 
 

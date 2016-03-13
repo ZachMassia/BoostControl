@@ -3,7 +3,7 @@
 
 #include <Arduino.h>
 #include "Globals.h"
-#include "ControlMode.h"
+#include "ControlMode.hpp"
 
 class OpenLoop: public ControlMode
 {

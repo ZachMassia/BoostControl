@@ -6,10 +6,10 @@
 #include <ThreadController.h>
 
 #include "Globals.h"
-#include "ButtonThread.h"
-#include "ControlMode.h"
-#include "OpenLoop.h"
-#include "ClosedLoop.h"
+#include "ButtonThread.hpp"
+#include "ControlMode.hpp"
+#include "OpenLoop.hpp"
+#include "ClosedLoop.hpp"
 
 // Threads
 ThreadController controller;
