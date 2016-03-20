@@ -8,7 +8,7 @@ ClosedLoop::ClosedLoop(BoostMode const& _currentMode, BoostMode _modeType, byte 
     , mapSensorPin(_mapSensorPin)
     , mapReading(0)
     , dutyCycle(0)
-    , boostSetpoint(0)
+    , boostSetpoint(CLOSED_LOOP_INIT_SETPOINT)
     , Kp(0), Ki(0), Kd(0) // TODO Set default values, or load from PROGMEM
     , pid(&mapReading, &dutyCycle, &boostSetpoint, Kp, Ki, Kd, REVERSE)
 {
