@@ -23,7 +23,8 @@ void ClosedLoop::onUpBtn()
 
 void ClosedLoop::onDownBtn()
 {
-    boostSetpoint -= 0.5;
+    if (boostSetpoint > 0)
+        boostSetpoint -= 0.5;
 }
 
 
