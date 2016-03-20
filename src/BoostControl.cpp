@@ -144,7 +144,7 @@ void updateLCDModeOutput()
 
 ControlMode *getModePtr()
 {
-    static ControlMode *modes[] = { nullptr, openLoop, closedLoop };
+    ControlMode *modes[] = { nullptr, openLoop, closedLoop };
 
     return modes[currentBoostMode];
 }
