@@ -1,9 +1,10 @@
 #include "ClosedLoop.hpp"
+#include "Utils.hpp"
 
 
 ClosedLoop::ClosedLoop(BoostMode const& _currentMode, BoostMode _modeType, byte _solenoidPin,
-                       byte _mapSensorPin)
-    : ControlMode(_currentMode, _modeType, _solenoidPin, String(F("EBC: Closed Loop")))
+                       byte _mapSensorPin, double _atmPSI)
+    : ControlMode(_currentMode, _modeType, _solenoidPin, String(F("EBC: Closed Loop")), _atmPSI)
     , mapSensorPin(_mapSensorPin)
     , mapReading(0)
     , dutyCycle(0)
@@ -36,16 +37,34 @@ void ClosedLoop::onDeactivate()
 
 void ClosedLoop::onActivate()
 {
-    pid.SetMode(AUTOMATIC);
+    // TODO: Should solenoid be set to initial duty cycle as soon as we enter
+    //       closed loop mode, or only when at (SETPOINT - THRESHOLD)?
 }
 
 
 void ClosedLoop::update()
 {
-    mapReading = analogRead(mapSensorPin);
+    // Calculate the current intake presure in PSIG.
+    mapReading = mapVoltageToPSIA(SENSOR_RATING, analogRead(mapSensorPin)) - atmPSI;
 
-    if (pid.Compute()) {
-        analogWrite(solenoidPin, dutyCycle);
+    double cutoff = boostSetpoint - CLOSED_LOOP_THRESHOLD;
+
+    if (mapReading < cutoff) {
+        // We haven't reached the threshold, close the solenoid.
+        pid.SetMode(MANUAL);
+        analogWrite(solenoidPin, 0);
+    }
+    else if (mapReading > cutoff && mapReading < (cutoff + 1)) {
+        // Allow for 1 PSI above threshold before handing off control to PID.
+        pid.SetMode(MANUAL);
+        // TODO: Should this duty cycle be recalculated at some point?
+        analogWrite(solenoidPin, CLOSED_LOOP_INIT_DUTY_CYCLE);
+    }
+    else {
+        pid.SetMode(AUTOMATIC);
+        if (pid.Compute()) {
+            analogWrite(solenoidPin, dutyCycle);
+        }
     }
 }
 

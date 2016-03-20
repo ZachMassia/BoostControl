@@ -20,8 +20,18 @@
 
 enum BoostMode { Off, OpenLoopMode, ClosedLoopMode, TotalModeCount};
 
-// Tuning
-#define OPEN_LOOP_INIT_DUTY_CYCLE 195   // 0-255
+// MAP Sensor Ranges
+// Values based off chart at http://injector-rehab.com/shop/mapsensor.html
+#define TWO_BAR_MIN_PSIA   1.3
+#define TWO_BAR_MAX_PSIA   30.2
+#define THREE_BAR_MIN_PSIA 0.5
+#define THREE_BAR_MAX_PSIA 45.7
 
+// Tuning
+#define SENSOR_RATING               3   // 2 or 3 Bar MAP sensor.
+#define OPEN_LOOP_INIT_DUTY_CYCLE   195 // 0-255
+#define CLOSED_LOOP_INIT_DUTY_CYCLE 180 // 0-255
+#define CLOSED_LOOP_THRESHOLD       5   // PSI - Control at what pressure to start the PID control.
+#define CLOSED_LOOP_INIT_SETPOINT   13  // PSIG
 
 #endif /* GLOBALS_H */

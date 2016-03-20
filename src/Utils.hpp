@@ -2,18 +2,15 @@
 #define UTILS_H
 
 #include <Arduino.h>
+#include "Globals.h"
 
 
-double barToPSI(double bar)
-{
-    return bar / 0.0689475728;
-}
+double barToPSI(double bar);
 
+double psiToBar(double psi);
 
-double psiToBar(double psi)
-{
-    return psi * 0.0689475728;
-}
+double mapDouble(double x, double in_min, double in_max, double out_min, double out_max);
 
+double mapVoltageToPSIA(int sensorRating, double voltage);
 
 #endif /* UTILS_H  */

@@ -13,14 +13,17 @@ protected:
     const BoostMode &currentMode;
     const BoostMode modeType;
     const byte solenoidPin;
+    const double atmPSI;
 
 public:
     const String headerStr;
 
-    ControlMode(BoostMode const& _currentMode, BoostMode _modeType, byte _solenoidPin, String _headerStr)
+    ControlMode(BoostMode const& _currentMode, BoostMode _modeType, byte _solenoidPin,
+                String _headerStr, double _atmPSI)
         : currentMode(_currentMode)
         , modeType(_modeType)
         , solenoidPin(_solenoidPin)
+        , atmPSI(_atmPSI)
         , headerStr(_headerStr)
         {}
 

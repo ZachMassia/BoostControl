@@ -6,6 +6,7 @@
 #include <ThreadController.h>
 
 #include "Globals.h"
+#include "Utils.hpp"
 #include "ButtonThread.hpp"
 #include "ControlMode.hpp"
 #include "OpenLoop.hpp"
@@ -20,12 +21,13 @@ Thread           lcdThread;
 
 // Runtime settings
 BoostMode   currentBoostMode = Off;
-ControlMode *previousMode  = nullptr;
+ControlMode *previousMode    = nullptr;
+double      atmPSI           = 0.0;
 
 // Objects
 LiquidCrystal lcd(2, 3, 4, 5, 6, 7);
-OpenLoop      openLoop(currentBoostMode, OpenLoopMode, SOLENOID_PIN, OPEN_LOOP_INIT_DUTY_CYCLE);
-ClosedLoop    closedLoop(currentBoostMode, ClosedLoopMode, SOLENOID_PIN, MAP_SENSOR_PIN);
+OpenLoop*      openLoop = nullptr;
+ClosedLoop*    closedLoop = nullptr;
 
 
 // Functions
@@ -49,6 +51,12 @@ void setup() // ----------------------------------------------------------------
     controller.add(&lcdThread);
 
     updateLCDBoostMode();
+
+    // Grab the current atmospheric pressure.
+    atmPSI = mapVoltageToPSIA(SENSOR_RATING, analogRead(MAP_SENSOR_PIN));
+
+    openLoop   = new OpenLoop(currentBoostMode, OpenLoopMode, SOLENOID_PIN, OPEN_LOOP_INIT_DUTY_CYCLE, atmPSI);
+    closedLoop = new ClosedLoop(currentBoostMode, ClosedLoopMode, SOLENOID_PIN, MAP_SENSOR_PIN, atmPSI);
 }
 
 void loop() // -------------------------------------------------------------------------------------
@@ -136,7 +144,7 @@ void updateLCDModeOutput()
 
 ControlMode *getModePtr()
 {
-    static ControlMode *modes[] = { nullptr, &openLoop, &closedLoop };
+    static ControlMode *modes[] = { nullptr, openLoop, closedLoop };
 
     return modes[currentBoostMode];
 }
