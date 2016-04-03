@@ -31,6 +31,9 @@ public:
     virtual void update();
 
     virtual const String getOutputStr();
+
+    const String getLogStrFormat();
+    const String getLogStr();
 };
 
 #endif /* CLOSEDLOOP_H */

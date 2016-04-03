@@ -20,6 +20,7 @@ ButtonThread     modeBtn(MODE_BTN_PIN, BTN_DEBOUNCE_TIME, BTN_SAMPLE_FREQ);
 Thread           lcdThread;
 
 // Runtime settings
+bool        loggingEnabled   = true;
 BoostMode   currentBoostMode = Off;
 ControlMode *previousMode    = nullptr;
 double      atmPSI           = 0.0;
@@ -35,13 +36,14 @@ void initButtons();
 void toggleBoostMode();
 void updateLCDBoostMode();
 void updateLCDModeOutput();
+void logSensors();
 
 ControlMode *getModePtr();
 
 
 void setup() // ------------------------------------------------------------------------------------
 {
-    Serial.begin(9600);
+    Serial.begin(500000);
     lcd.begin(LCD_W, LCD_H);
 
     initButtons();
@@ -57,6 +59,8 @@ void setup() // ----------------------------------------------------------------
 
     openLoop   = new OpenLoop(currentBoostMode, OpenLoopMode, SOLENOID_PIN, OPEN_LOOP_INIT_DUTY_CYCLE, atmPSI);
     closedLoop = new ClosedLoop(currentBoostMode, ClosedLoopMode, SOLENOID_PIN, MAP_SENSOR_PIN, atmPSI);
+
+    Serial.println(closedLoop->getLogStrFormat());
 }
 
 void loop() // -------------------------------------------------------------------------------------
@@ -95,6 +99,7 @@ void loop() // -----------------------------------------------------------------
         }
 
         currentMode->update();
+        logSensors();
     }
 }
 
@@ -129,6 +134,7 @@ void updateLCDBoostMode()
     }
 }
 
+
 void updateLCDModeOutput()
 {
     ControlMode *mode = getModePtr();
@@ -139,6 +145,14 @@ void updateLCDModeOutput()
 
     lcd.setCursor(0, 1);
     lcd.print(mode->getOutputStr());
+}
+
+
+void logSensors()
+{
+    if (loggingEnabled && currentBoostMode == OpenLoopMode) {
+        Serial.println(closedLoop->getLogStr());
+    }
 }
 
 

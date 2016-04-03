@@ -78,3 +78,40 @@ const String ClosedLoop::getOutputStr()
 
     return str;
 }
+
+
+const String ClosedLoop::getLogStrFormat()
+{
+    return String(F("!log_format;timestamp;setpoint;map;duty;proportional;integral;derivative;|"));
+}
+
+
+const String ClosedLoop::getLogStr()
+{
+    String buffer = String(F("!"));  // Start msg
+
+    buffer.concat(millis());      // Timestamp
+    buffer.concat(F(";"));
+
+    buffer.concat(boostSetpoint); // Setpoint
+    buffer.concat(F(";"));
+
+    buffer.concat(mapReading);    // MAP Sensor value (PSIG)
+    buffer.concat(F(";"));
+
+    buffer.concat(dutyCycle);     // Duty cycle of output pin
+    buffer.concat(F(";"));
+
+    buffer.concat(Kp);            // PID proportional coefficient
+    buffer.concat(F(";"));
+
+    buffer.concat(Ki);            // PID integral coefficient
+    buffer.concat(F(";"));
+
+    buffer.concat(Kd);            // PID derivative coefficient
+    buffer.concat(F(";"));
+
+    buffer.concat(F("|"));        // End msg
+
+    return buffer;
+}
