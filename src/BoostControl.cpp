@@ -21,7 +21,7 @@ Thread           lcdThread;
 
 // Runtime settings
 bool        loggingEnabled   = true;
-BoostMode   currentBoostMode = Off;
+BoostMode   currentBoostMode = ClosedLoopMode; // TODO: Revert to Off before in-car testing.
 ControlMode *previousMode    = nullptr;
 double      atmPSI           = 0.0;
 
