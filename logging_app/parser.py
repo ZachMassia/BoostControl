@@ -1,4 +1,4 @@
-import sys
+import re
 import time
 import serial
 import threading
@@ -82,21 +82,105 @@ class Arduino:
         self.run_msg_loop = False
 
 
+class BadSerialMessageError(ValueError):
+    """Raised when an improperly formatted message is parsed."""
+
+
 class Parser:
 
     def __init__(self):
-        # Define the serial protocol.
+        # Define the serial protocol delimiters.
         self.msg_start = '!'
         self.msg_sep = ';'
         self.msg_end = '|'
+        self.msg_format = []
+
+    def verify_msg(self, msg):
+        """Ensure the message is of a valid format.
+
+        If the message contains the proper delimiters, it is deconstructed
+        into a list and returned.
+
+        Improperly formatted messages will raise a BadSerialMessageError.
+
+        """
+        if (not msg.startswith(self.msg_start) and
+                not msg.endswith(self.msg_end)):
+            raise BadSerialMessageError(
+                'Message missing start char "{}" or end char "{}"'.format(
+                    self.msg_start, self.msg_end))
+
+        # Remove start and end chars.
+        re_str = '[{}{}]'.format(self.msg_start, self.msg_end)
+        msg = re.sub(re_str, '', msg.strip())
+
+        # Split the message into a list using msg_sep.
+        return msg.split(self.msg_sep)
+
+    def register_format(self, msg):
+        """Parse the format line from the Arduino.
+
+        The first line sent from the Arduino after a reboot defines
+        the order of the sensor values to be sent thereafter.
+
+        """
+        try:
+            msg = self.verify_msg(msg)
+            if msg[0] == 'log_format':
+                self.msg_format = msg[1:]
+            else:
+                raise BadSerialMessageError(
+                    'Attempt to register format with invalid format string.')
+        except BadSerialMessageError as e:
+            print 'Error parsing format message.'
+            print 'The following message was received: "{}"'.format(msg)
+            print e.strerror
+            raise
+
+    def parse_log_line(self, msg):
+        """Parse a sensor log line from the Arduino.
+
+        The sensor value is stored in a dict along with it's name as
+        given in the format string.
+
+        TODO: Verify creating this many dict objects is not slowing
+              things down.
+
+        """
+        try:
+            data = self.verify_msg(msg)
+            data_dict = {}
+
+            for index, value in enumerate(data):
+                sensor = self.msg_format[index]
+                data_dict[sensor] = value
+            return data_dict
+        except BadSerialMessageError as e:  # TODO Factor this repetition out
+            print 'Error parsing log message.'
+            print 'The following message was received: "{}"'.format(msg)
+            print e.strerror
+            raise
+        except IndexError as e:
+            print 'Bad data: "{}"'.format(msg)
 
 
 def test():
     """Quick and dirty test method for reading from Arduino."""
 
+    parser = Parser()
+
     class Listener:
+
+        def __init__(self):
+            self.format_received = False
+
         def on_msg_received(self, msg):
-            print msg
+            if not self.format_received:
+                parser.register_format(msg)
+                self.format_received = True
+            else:
+                data = parser.parse_log_line(msg)
+                print 'Raw: "{}" | Dict: "{}"'.format(msg, data)
 
     listener = Listener()
     baud = 500000
