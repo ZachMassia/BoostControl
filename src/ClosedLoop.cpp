@@ -82,7 +82,7 @@ const String ClosedLoop::getOutputStr()
 
 const String ClosedLoop::getLogStrFormat()
 {
-    return String(F("!log_format;timestamp;setpoint;map;duty;proportional;integral;derivative;|"));
+    return String(F("!log_format;timestamp;setpoint;map;duty;proportional;integral;derivative|"));
 }
 
 
@@ -109,7 +109,6 @@ const String ClosedLoop::getLogStr()
     buffer.concat(F(";"));
 
     buffer.concat(Kd);            // PID derivative coefficient
-    buffer.concat(F(";"));
 
     buffer.concat(F("|"));        // End msg
 
