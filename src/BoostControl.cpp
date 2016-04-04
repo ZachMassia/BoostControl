@@ -150,7 +150,7 @@ void updateLCDModeOutput()
 
 void logSensors()
 {
-    if (loggingEnabled && currentBoostMode == OpenLoopMode) {
+    if (loggingEnabled && currentBoostMode == ClosedLoopMode) {
         Serial.println(closedLoop->getLogStr());
     }
 }
