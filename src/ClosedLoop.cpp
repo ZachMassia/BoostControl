@@ -88,7 +88,7 @@ const String ClosedLoop::getLogStrFormat()
 
 const String ClosedLoop::getLogStr()
 {
-    String buffer = String(F("!"));  // Start msg
+    String buffer = String(F("!sensor_readings;"));  // Start msg
 
     buffer.concat(millis());      // Timestamp
     buffer.concat(F(";"));

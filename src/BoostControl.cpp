@@ -18,6 +18,7 @@ ButtonThread     upBtn(UP_BTN_PIN,     BTN_DEBOUNCE_TIME, BTN_SAMPLE_FREQ);
 ButtonThread     downBtn(DOWN_BTN_PIN, BTN_DEBOUNCE_TIME, BTN_SAMPLE_FREQ);
 ButtonThread     modeBtn(MODE_BTN_PIN, BTN_DEBOUNCE_TIME, BTN_SAMPLE_FREQ);
 Thread           lcdThread;
+Thread           logThread;
 
 // Runtime settings
 bool        loggingEnabled   = true;
@@ -43,7 +44,11 @@ ControlMode *getModePtr();
 
 void setup() // ------------------------------------------------------------------------------------
 {
-    Serial.begin(500000);
+    Serial.begin(115200);
+    while (!Serial) {
+        ; // Wait for serial port to connect.
+    }
+
     lcd.begin(LCD_W, LCD_H);
 
     initButtons();
@@ -51,6 +56,10 @@ void setup() // ----------------------------------------------------------------
     lcdThread.onRun(updateLCDModeOutput);
     lcdThread.setInterval(LCD_UPDATE_TIME_MS);
     controller.add(&lcdThread);
+
+    logThread.onRun(logSensors);
+    logThread.setInterval(LOG_SPEED_MS);
+    controller.add(&logThread);
 
     updateLCDBoostMode();
 
@@ -99,7 +108,6 @@ void loop() // -----------------------------------------------------------------
         }
 
         currentMode->update();
-        logSensors();
     }
 }
 

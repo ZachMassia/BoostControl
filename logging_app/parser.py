@@ -11,6 +11,8 @@ PORT_NAMES = [
     # Mac OS X
     'tty.usbmodem',
     'cu.usbmodem',
+    'tty.usbserial',
+    'cu.usbserial',
     # Linux
     '/dev/usbdev',
     '/dev/tty',
@@ -41,6 +43,13 @@ class Arduino:
                     return port.device
         return ''
 
+    def reset_arduino(self):
+        """Toggle DTR which causes the Arduino to reset."""
+        self.ser.setDTR(False)
+        time.sleep(1)
+        self.ser.flushInput()
+        self.ser.setDTR(True)
+
     def register_listener(self, listener):
         """Register a listener to the message received event."""
         # Make sure the listener has the on_msg_received method defined.
@@ -59,7 +68,7 @@ class Arduino:
         # TODO: Add error handling.
         if not self.ser.isOpen():
             self.ser.open()
-            time.sleep(2)  # Allow the Arduino time to reboot.
+            self.reset_arduino()
 
         self.run_msg_loop = True
 
@@ -95,11 +104,11 @@ class Parser:
         self.msg_end = '|'
         self.msg_format = []
 
-    def verify_msg(self, msg):
+    def parse_msg(self, msg):
         """Ensure the message is of a valid format.
 
-        If the message contains the proper delimiters, it is deconstructed
-        into a list and returned.
+        If the message contains the proper delimiters, it is returned in
+        a map with the header and data.
 
         Improperly formatted messages will raise a BadSerialMessageError.
 
@@ -107,38 +116,36 @@ class Parser:
         if (not msg.startswith(self.msg_start) and
                 not msg.endswith(self.msg_end)):
             raise BadSerialMessageError(
-                'Message missing start char "{}" or end char "{}"'.format(
-                    self.msg_start, self.msg_end))
+                'Message missing start char "{}" or end char "{}": {}'.format(
+                    self.msg_start, self.msg_end, msg))
 
         # Remove start and end chars.
         re_str = '[{}{}]'.format(self.msg_start, self.msg_end)
         msg = re.sub(re_str, '', msg.strip())
 
-        # Split the message into a list using msg_sep.
-        return msg.split(self.msg_sep)
+        # Split the messaged based on msg_sep.
+        msg = msg.split(self.msg_sep)
+        header = msg[0]
+        data = msg[1:]
 
-    def register_format(self, msg):
-        """Parse the format line from the Arduino.
+        # Make sure at least one data item was received.
+        if not len(data):
+            raise BadSerialMessageError(
+                'No data was sent with msg header "{}"'.format(header))
+
+        return {'header': header, 'data': data}
+
+    def register_log_format(self, data):
+        """Register the log format message from the Arduino.
 
         The first line sent from the Arduino after a reboot defines
         the order of the sensor values to be sent thereafter.
 
         """
-        try:
-            msg = self.verify_msg(msg)
-            if msg[0] == 'log_format':
-                self.msg_format = msg[1:]
-            else:
-                raise BadSerialMessageError(
-                    'Attempt to register format with invalid format string.')
-        except BadSerialMessageError as e:
-            print 'Error parsing format message.'
-            print 'The following message was received: "{}"'.format(msg)
-            print e.strerror
-            raise
+        self.msg_format = data
 
-    def parse_log_line(self, msg):
-        """Parse a sensor log line from the Arduino.
+    def parse_sensor_readings(self, data):
+        """Parse a sensor readings message from the Arduino.
 
         The sensor value is stored in a dict along with it's name as
         given in the format string.
@@ -148,48 +155,61 @@ class Parser:
 
         """
         try:
-            data = self.verify_msg(msg)
-            data_dict = {}
+            readings = {}
+            for sensor_id, value in enumerate(data):
+                sensor = self.msg_format[sensor_id]
+                readings[sensor] = value
+            return readings
+        except IndexError:
+            raise BadSerialMessageError(
+                'Received more sensor data than actual sensors: "{}"'.format(
+                    data))
 
-            for index, value in enumerate(data):
-                sensor = self.msg_format[index]
-                data_dict[sensor] = value
-            return data_dict
-        except BadSerialMessageError as e:  # TODO Factor this repetition out
-            print 'Error parsing log message.'
-            print 'The following message was received: "{}"'.format(msg)
-            print e.strerror
-            raise
-        except IndexError as e:
-            print 'Bad data: "{}"'.format(msg)
+
+class ArduinoController:
+
+    BAUD_RATE = 115200
+
+    def __init__(self):
+        self.parser = Parser()
+
+        self.arduino = Arduino(ArduinoController.BAUD_RATE)
+        self.arduino.register_listener(self)
+
+        self.msg_handlers = {
+            'log_format': self.parser.register_log_format,
+            'sensor_readings': self.handle_sensor_readings
+        }
+
+    def on_msg_received(self, msg):
+        """Attempt to parse & handle the received serial message."""
+        parsed_msg = self.parser.parse_msg(msg)
+        try:
+            self.msg_handlers[parsed_msg['header']](parsed_msg['data'])
+        except KeyError:
+            raise BadSerialMessageError(
+                'Unknown command: {}'.format(parsed_msg['header']))
+
+    def start(self):
+        self.arduino.start()  # For now simply delegate to the Arduino class.
+
+    def stop(self):
+        self.arduino.stop()  # For now simply delegate to the Arduino class.
+
+    def handle_sensor_readings(self, data):
+        """Store the sensor readings in the database."""
+        # TODO: Implement database storage.
+        print self.parser.parse_sensor_readings(data)
 
 
 def test():
     """Quick and dirty test method for reading from Arduino."""
 
-    parser = Parser()
-
-    class Listener:
-
-        def __init__(self):
-            self.format_received = False
-
-        def on_msg_received(self, msg):
-            if not self.format_received:
-                parser.register_format(msg)
-                self.format_received = True
-            else:
-                data = parser.parse_log_line(msg)
-                print 'Raw: "{}" | Dict: "{}"'.format(msg, data)
-
-    listener = Listener()
-    baud = 500000
-    run_time = 10  # seconds
-
-    arduino = Arduino(baud)
-    arduino.register_listener(listener)
+    arduino = ArduinoController()
+    run_time = 10
 
     print 'Starting serial receive loop for {} seconds.'.format(run_time)
+
     arduino.start()
     time.sleep(run_time)
 
