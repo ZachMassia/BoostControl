@@ -76,6 +76,7 @@ class Arduino:
                 self.notify_listeners(msg)
 
         # Someone called stop(), so close the serial connection.
+        self.ser.flush()
         self.ser.close()
 
     def start(self):

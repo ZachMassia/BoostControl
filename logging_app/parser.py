@@ -26,8 +26,10 @@ class Parser:
         Improperly formatted messages will raise a BadSerialMessageError.
 
         """
-        if (not msg.startswith(self.msg_start) and
-                not msg.endswith(self.msg_end)):
+        msg = msg.strip()
+
+        if not (msg.startswith(self.msg_start) and
+                msg.endswith(self.msg_end)):
             raise BadSerialMessageError(
                 'Message missing start char "{}" or end char "{}": {}'.format(
                     self.msg_start, self.msg_end, msg))
@@ -55,7 +57,18 @@ class Parser:
         the order of the sensor values to be sent thereafter.
 
         """
-        self.msg_format = data
+        for sensor in data:
+            data_type, sensor_name = sensor.split(':')
+            if data_type == 'f':
+                data_type = float
+            elif data_type == 'i':
+                data_type = int
+            else:
+                raise BadSerialMessageError(
+                    'Unknown data type "{}" for sensor "{}"'.format(
+                        data_type, sensor_name))
+
+            self.msg_format.append({'type': data_type, 'name': sensor_name})
         print 'Using log format: {}'.format(data)
 
     def parse_sensor_readings(self, data):
@@ -71,13 +84,17 @@ class Parser:
         try:
             readings = {}
             for sensor_id, value in enumerate(data):
-                sensor = self.msg_format[sensor_id]
-                readings[sensor] = value
+                sensor_info = self.msg_format[sensor_id]
+                readings[sensor_info['name']] = sensor_info['type'](value)
             return readings
         except IndexError:
             raise BadSerialMessageError(
                 'Received more sensor data than actual sensors: "{}"'.format(
                     data))
+        except ValueError:
+            raise BadSerialMessageError(
+                'Could not convert {}: "{}" to {}'.format(
+                    sensor_info['name'], value, sensor_info['type']))
 
 
 class ArduinoController:
@@ -105,14 +122,17 @@ class ArduinoController:
             self.log_received_listeners.append(listener)
 
     def on_msg_received(self, msg):
-        """Attempt to parse & handle the received serial message."""
-        parsed_msg = self.parser.parse_msg(msg)
+        """Attempt to parse & handle the received serial message."""        
         try:
+            parsed_msg = self.parser.parse_msg(msg)
             handler = self.msg_handlers[parsed_msg['header']]
             handler(parsed_msg['data'])
         except KeyError:
             raise BadSerialMessageError(
                 'Unknown command: {}'.format(parsed_msg['header']))
+        except BadSerialMessageError as e:
+            print 'Ignoring bad msg: {}'.format(e)
+
 
     def start(self):
         self.arduino.start()  # For now simply delegate to the Arduino class.
@@ -122,6 +142,9 @@ class ArduinoController:
 
     def notify_listeners(self, data):
         """Notify all listeners of the log received event."""
-        readings = self.parser.parse_sensor_readings(data)
-        for listener in self.log_received_listeners:
-            listener.on_log_received(readings)
+        try:
+            readings = self.parser.parse_sensor_readings(data)
+            for listener in self.log_received_listeners:
+                listener.on_log_received(readings)
+        except BadSerialMessageError as e:
+            print "Ignoring bad log: {}".format(e)
