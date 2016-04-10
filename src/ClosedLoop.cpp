@@ -82,7 +82,7 @@ const String ClosedLoop::getOutputStr()
 
 const String ClosedLoop::getLogStrFormat()
 {
-    return String(F("!log_format;timestamp;setpoint;map;duty;proportional;integral;derivative|"));
+    return String(F("!log_format;timestamp;setpoint;map_reading;duty_cycle;kp;ki;kd|"));
 }
 
 
