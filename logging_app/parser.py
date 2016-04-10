@@ -113,24 +113,3 @@ class ArduinoController:
         """Store the sensor readings in the database."""
         # TODO: Implement database storage.
         print self.parser.parse_sensor_readings(data)
-
-
-def test():
-    """Quick and dirty test method for reading from Arduino."""
-
-    arduino = ArduinoController()
-    run_time = 10
-
-    print 'Starting serial receive loop for {} seconds.'.format(run_time)
-
-    arduino.start()
-    time.sleep(run_time)
-
-    print 'Calling stop()'
-    arduino.stop()
-    time.sleep(0.25)
-    print 'All done.'
-
-
-if __name__ == '__main__':
-    test()
