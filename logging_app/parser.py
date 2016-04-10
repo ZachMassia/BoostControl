@@ -98,7 +98,8 @@ class ArduinoController:
         """Attempt to parse & handle the received serial message."""
         parsed_msg = self.parser.parse_msg(msg)
         try:
-            self.msg_handlers[parsed_msg['header']](parsed_msg['data'])
+            handler = self.msg_handlers[parsed_msg['header']]
+            handler(parsed_msg['data'])
         except KeyError:
             raise BadSerialMessageError(
                 'Unknown command: {}'.format(parsed_msg['header']))
