@@ -12,7 +12,7 @@ class Session(Base):
     desc          = Column(String)
     creation_time = Column(DateTime)
 
-    logs = relationship('Log', order_by=Log.log_id, back_populates='session')
+    logs = relationship('Log', order_by='Log.log_id', backref='session')
 
 
 class Log(Base):
@@ -27,4 +27,3 @@ class Log(Base):
     kd            = Column(Float)
 
     session_id = Column(Integer, ForeignKey('session.session_id'))
-    session    = relationship('Session', back_populates='log')

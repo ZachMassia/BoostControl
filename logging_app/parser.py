@@ -56,6 +56,7 @@ class Parser:
 
         """
         self.msg_format = data
+        print 'Using log format: {}'.format(data)
 
     def parse_sensor_readings(self, data):
         """Parse a sensor readings message from the Arduino.
@@ -121,5 +122,6 @@ class ArduinoController:
 
     def notify_listeners(self, data):
         """Notify all listeners of the log received event."""
+        readings = self.parser.parse_sensor_readings(data)
         for listener in self.log_received_listeners:
-            listener.on_log_received(data)
+            listener.on_log_received(readings)
