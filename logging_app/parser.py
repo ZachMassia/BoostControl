@@ -94,6 +94,15 @@ class ArduinoController:
             'sensor_readings': self.handle_sensor_readings
         }
 
+        self.log_received_listeners = []
+
+    def register_listener(self, listener):
+        """Register a listener to the log received event."""
+        # Make sure the listener has the on_log_received method defined.
+        m = getattr(listener, 'on_log_received', None)
+        if callable(m):
+            self.log_received_listeners.append(listener)
+
     def on_msg_received(self, msg):
         """Attempt to parse & handle the received serial message."""
         parsed_msg = self.parser.parse_msg(msg)
@@ -110,7 +119,7 @@ class ArduinoController:
     def stop(self):
         self.arduino.stop()  # For now simply delegate to the Arduino class.
 
-    def handle_sensor_readings(self, data):
-        """Store the sensor readings in the database."""
-        # TODO: Implement database storage.
-        print self.parser.parse_sensor_readings(data)
+    def notify_listeners(self, data):
+        """Notify all listeners of the log received event."""
+        for listener in self.log_received_listeners:
+            listener.on_log_received(data)
