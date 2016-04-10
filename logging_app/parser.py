@@ -91,7 +91,7 @@ class ArduinoController:
 
         self.msg_handlers = {
             'log_format': self.parser.register_log_format,
-            'sensor_readings': self.handle_sensor_readings
+            'sensor_readings': self.notify_listeners
         }
 
         self.log_received_listeners = []
