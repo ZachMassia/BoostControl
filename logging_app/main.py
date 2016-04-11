@@ -38,11 +38,11 @@ class LogSessionManager:
         if not self.logging_session:
             return
 
-        s = self.Session.query(models.Log).\
+        entry_count = self.Session.query(models.Log).\
             filter(models.Log.session_id == self.current_log_id).\
             count()
         print 'Closing log session {}, {} entries were logged.'.\
-            format(self.current_log_id, s)
+            format(self.current_log_id, entry_count)
         self.logging_session = None
 
     def on_log_received(self, log_data):
