@@ -1,7 +1,7 @@
 from time import sleep
 from datetime   import datetime
 
-from sqlalchemy     import create_engine
+from sqlalchemy     import create_engine, func
 from sqlalchemy.orm import sessionmaker, scoped_session
 
 import models
@@ -12,27 +12,44 @@ class LogSessionManager:
 
     def __init__(self, Session):
         self.logging_session = None
+        self.current_log_id = None
         self.Session = Session
 
-    def get_current_logging_session(self):
-        """Returns the current logging session. Creating it if required."""
-        if not self.logging_session:
-            self.logging_session = models.Session(creation_time=datetime.now())
-            self.Session.add(self.logging_session)
-            self.Session.commit()
+    def _start_logging_session(self, name=None, desc=None):
+        """Create a new session entry in the database. Internal use only."""
+        self.logging_session = models.Session(
+            creation_time=datetime.now(),
+            name=name,
+            desc=desc
+        )
+        self.Session.add(self.logging_session)
+        self.Session.commit()
 
+        # Store the current log session_id. This way the log session can be
+        # retrieved when closing the session, as it is not called from the
+        # serial message handling thread.
+        self.current_log_id = self.logging_session.session_id
+
+        # As a convenience, return the logging session object.
         return self.logging_session
 
-    def end_current_logging_session(self):
-        """Commit any changes to the db and close the logging session."""
+    def end_logging_session(self):
+        """Close the logging session."""
+        if not self.logging_session:
+            return
+
+        s = self.Session.query(models.Log).\
+            filter(models.Log.session_id == self.current_log_id).\
+            count()
+        print 'Closing log session {}, {} entries were logged.'.\
+            format(self.current_log_id, s)
         self.logging_session = None
 
     def on_log_received(self, log_data):
         """Event handler for received logs."""
-        # TODO: Verify log_data is valid before inserting.
         try:
             log = models.Log(**log_data)
-            s = self.get_current_logging_session()
+            s = self.logging_session or self._start_logging_session()
             s.logs.append(log)
             self.Session.commit()
         except:
@@ -54,7 +71,7 @@ def main():
     arduino.start()
     sleep(15)
     arduino.stop()
-    logs.end_current_logging_session()
+    logs.end_logging_session()
 
 
 if __name__ == '__main__':
