@@ -82,13 +82,13 @@ const String ClosedLoop::getOutputStr()
 
 const String ClosedLoop::getLogStrFormat()
 {
-    return String(F("!log_format;timestamp;setpoint;map_reading;duty_cycle;kp;ki;kd|"));
+    return String(F("!logFormat;timestamp;setpoint;mapReading;dutyCycle;kP;kI;kD|"));
 }
 
 
 const String ClosedLoop::getLogStr()
 {
-    String buffer = String(F("!sensor_readings;"));  // Start msg
+    String buffer = String(F("!sensorReadings;"));  // Start msg
 
     buffer.concat(millis());      // Timestamp
     buffer.concat(F(";"));
@@ -110,7 +110,7 @@ const String ClosedLoop::getLogStr()
 
     buffer.concat(Kd);            // PID derivative coefficient
 
-    buffer.concat(F("|"));        // End msg
+    buffer.concat(F("|\n "));      // End msg
 
     return buffer;
 }

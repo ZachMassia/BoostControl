@@ -122,7 +122,7 @@ class ArduinoController:
             self.log_received_listeners.append(listener)
 
     def on_msg_received(self, msg):
-        """Attempt to parse & handle the received serial message."""        
+        """Attempt to parse & handle the received serial message."""
         try:
             parsed_msg = self.parser.parse_msg(msg)
             handler = self.msg_handlers[parsed_msg['header']]

@@ -28,7 +28,7 @@ enum BoostMode { Off, OpenLoopMode, ClosedLoopMode, TotalModeCount};
 #define THREE_BAR_MAX_PSIA 45.7
 
 // Tuning
-#define LOG_SPEED_MS                10
+#define LOG_SPEED_MS                50
 #define SENSOR_RATING               3   // 2 or 3 Bar MAP sensor.
 #define OPEN_LOOP_INIT_DUTY_CYCLE   195 // 0-255
 #define CLOSED_LOOP_INIT_DUTY_CYCLE 180 // 0-255

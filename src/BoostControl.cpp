@@ -58,7 +58,7 @@ void setup() // ----------------------------------------------------------------
     controller.add(&lcdThread);
 
     logThread.onRun(logSensors);
-    logThread.setInterval(LOG_SPEED_MS);
+    logThread.setInterval(LOG_SPEED_MS-1); // Runs 1ms slower than the value passed.
     controller.add(&logThread);
 
     updateLCDBoostMode();
@@ -159,7 +159,7 @@ void updateLCDModeOutput()
 void logSensors()
 {
     if (loggingEnabled && currentBoostMode == ClosedLoopMode) {
-        Serial.println(closedLoop->getLogStr());
+        Serial.print(closedLoop->getLogStr());
     }
 }
 
